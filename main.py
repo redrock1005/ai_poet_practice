@@ -1,28 +1,25 @@
-# from dotenv import load_dotenv
-# load_dotenv()
 import streamlit as st
 from langchain_openai import ChatOpenAI
 
-chat_model = ChatOpenAI()  # 변수 이름 오타 수정
+# Initialize the chat model
+chat_model = ChatOpenAI()
 
-st.title('인공지능 시인')
+# Title of the application
+st.title('Artificial Intelligence Poet')
 
-content = st.text_input('시의 주제를 입력해 주세요.')
+# Input for the poem topic
+content = st.text_input('Please enter the topic of the poem.')
 
-if st.button('시 작성 요청하기'):
-    with st.spinner('시 작성 중...'):
-        result = chat_model.predict(content + "에 대한 시를 써줘")  # 변수 이름 오타 수정
-        st.write(result)
+# Define a key for storing the result in the session state
+if 'result' not in st.session_state:
+    st.session_state.result = None
 
-# st.write('입력', content)
+# Button to request writing a poem
+if st.button('Request to write a poem'):
+    with st.spinner('Writing poetry...'):
+        # Call to the model to generate a poem
+        st.session_state.result = chat_model.predict(content + "Write a poem about")
 
-
-
-
-
-
-
-# from langchain.llms import openai
-# llms = openai.OpenAI()
-# result = llms.predict("내가 좋아하는 동물은?")
-# print(result)
+# Display the result if it exists
+if st.session_state.result:
+    st.write(st.session_state.result)
