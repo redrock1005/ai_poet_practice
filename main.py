@@ -1,25 +1,27 @@
 import streamlit as st
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain_openai import ChatOpenAI
 
-# Initialize the chat model
-chat_model = ChatOpenAI()
+# Define a simple callback function to handle output
+def handle_output(line):
+    # Using Streamlit's session state to append output
+    if 'output' not in st.session_state:
+        st.session_state.output = ""
+    st.session_state.output += line + "\n"
 
-# Title of the application
+# Create an instance of the callback handler with your function
+stdout_callback = StreamingStdOutCallbackHandler(callback=handle_output)
+
+# Initialize the chat model with the callback if supported
+chat_model = ChatOpenAI(callbacks=[stdout_callback])
+
 st.title('Artificial Intelligence Poet')
 
-# Input for the poem topic
 content = st.text_input('Please enter the topic of the poem.')
 
-# Define a key for storing the result in the session state
-if 'result' not in st.session_state:
-    st.session_state.result = None
-
-# Button to request writing a poem
 if st.button('Request to write a poem'):
     with st.spinner('Writing poetry...'):
         # Call to the model to generate a poem
-        st.session_state.result = chat_model.predict(content + "Write a poem about")
-
-# Display the result if it exists
-if st.session_state.result:
-    st.write(st.session_state.result)
+        st.session_state.output = ""  # Resetting the output
+        chat_model.predict(content + " Write a poem about")
+        st.text_area("Poem Output", value=st.session_state.output, height=300)
